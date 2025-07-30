@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Reviewer</title>
+</head>
+<body>
+    <h1>AI Code Reviewer</h1>
+    <form id="codeForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" accept=".py" /><br /><br />
+        <select id="llmProviderInput" name="llm_provider">
+            <option value="gemini">Gemini</option>
+            <option value="openai">OpenAI</option>
+        </select><br /><br />
+        <input type="text" id="modelInput" name="model" placeholder="Model (e.g., gemini-2.5-flash)" /><br /><br />
+        <input type="text" id="apiKeyInput" name="api_key" placeholder="LLM API Key" /><br /><br />
+        <button type="submit">Analyze Code</button>
+    </form>
+    <div id="results"></div>
+    <script>
+        document.getElementById("codeForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            console.log("FormData file:", formData.get("file"));
+            try {
+                const response = await fetch("/analyze/file", {
+                    method: "POST",
+                    body: formData,
+                });
+                console.log("Response status:", response.status);
+                const result = await response.json();
+                console.log("Response JSON:", result);
+                if (response.ok) {
+                    let output = "<h2>Analysis Results:</h2>";
+                    output += "<h3>Line Limit Errors:</h3>" + (result.line_limit?.length ? result.line_limit.join("<br />") : "None") + "<br /><br />";
+                    output += "<h3>Formatting Issues:</h3>" + (result.formatting?.length ? result.formatting.join("<br />") : "None") + "<br /><br />";
+                    output += "<h3>Syntax Errors:</h3>" + (result.syntax?.length ? result.syntax.join("<br />") : "None") + "<br /><br />";
+                    output += "<h3>Potential Bugs:</h3>" + (result.bugs?.length ? result.bugs.map(b => {
+                        const line = b.line || "unknown";
+                        const issue = b.issue || "No issue provided";
+                        const advice = b.advice || "No advice provided";
+                        return `Line: ${line}<br />Issue: ${issue}<br />Advice: ${advice}`;
+                    }).join("<br /><br />") : "None") + "<br /><br />";
+                    output += "<h3>Efficiency Suggestions:</h3>" + (result.efficiency?.length ? result.efficiency.map(e => {
+                        const line = e.line || "unknown";
+                        const issue = e.issue || "No issue provided";
+                        const advice = e.advice || "No advice provided";
+                        return `Line: ${line}<br />Issue: ${issue}<br />Advice: ${advice}`;
+                    }).join("<br /><br />") : "None") + "<br /><br />";
+                    output += "<h3>Non-Idiomatic Code:</h3>" + (result.idiomatic?.length ? result.idiomatic.map(i => {
+                        const line = i.line || "unknown";
+                        const issue = i.issue || "No issue provided";
+                        const advice = i.advice || "No advice provided";
+                        return `Line: ${line}<br />Issue: ${issue}<br />Advice: ${advice}`;
+                    }).join("<br /><br />") : "None");
+                    document.getElementById("results").innerHTML = output;
+                } else {
+                    document.getElementById("results").innerHTML = `<h2>Error:</h2>${result.detail || "Unknown error"}`;
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                document.getElementById("results").innerHTML = `<h2>Error:</h2>Failed to fetch response: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
