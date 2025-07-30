@@ -2,6 +2,9 @@
 
  A Python code reviewer that checks for syntax errors, potential bugs, and code style issues using common Python linting and analysis tools like flake8, pylint, and a custom syntax checker. The reviewer will take a Python code snippet as input, analyze it, and provide feedback on syntax errors
 
+# First Download the Repo in your system
+
+select the folder
 # Obtain API Keys
 
 Gemini:
@@ -21,4 +24,16 @@ Note: You only need one key (Gemini or OpenAI) to start the service, but you can
 
 # Steps to Run the Code
 Install required packages: 
+```bash
 pip install fastapi uvicorn black google-generativeai openai requests python-multipart.
+```
+# Set API Keys:
+
+Gemini: From Google AI Studio, set as
+```bash 
+GEMINI_API_KEY
+```
+OpenAI: From OpenAI, set as 
+```
+OPENAI_API_KEY
+```
